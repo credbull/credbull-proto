@@ -38,6 +38,8 @@ export const ContractUI = ({ contractName, className = "" }: ContractUIProps) =>
     );
   }
 
+  console.log(`Deployed Contract Data\n`, deployedContractData);
+
   return (
     <div className={`grid grid-cols-1 lg:grid-cols-6 px-6 lg:px-10 lg:gap-12 w-full max-w-7xl my-0 ${className}`}>
       <div className="col-span-5 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
@@ -76,7 +78,7 @@ export const ContractUI = ({ contractName, className = "" }: ContractUIProps) =>
                 </div>
               </div>
               <div className="p-5 divide-y divide-base-300">
-                <ContractReadMethods deployedContractData={deployedContractData} />
+                <ContractReadMethods deployedContractData={deployedContractData} contractName={contractName} />
               </div>
             </div>
           </div>
@@ -91,6 +93,7 @@ export const ContractUI = ({ contractName, className = "" }: ContractUIProps) =>
                 <ContractWriteMethods
                   deployedContractData={deployedContractData}
                   onChange={triggerRefreshDisplayVariables}
+                  contractName={contractName}
                 />
               </div>
             </div>

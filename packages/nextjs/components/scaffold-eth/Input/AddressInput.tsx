@@ -12,14 +12,10 @@ import { CommonInputProps, InputBase, isENS } from "~~/components/scaffold-eth";
 export const AddressInput = ({ value, name, placeholder, onChange, disabled }: CommonInputProps<Address | string>) => {
   // Debounce the input to keep clean RPC calls when resolving ENS names
   // If the input is an address, we don't need to debounce it
-  // console.log(`PLaceHolder\n`, placeholder);
   const { address } = useAccount();
-  const [walletAddress, setWalletAddress] = useState<string | undefined>(undefined);
   useEffect(() => {
     if (placeholder === "address _balanceToken" && address !== undefined) {
-      setWalletAddress(address);
       onChange(address);
-      console.log(walletAddress);
     }
   }, [placeholder, address]);
   const _debouncedValue = useDebounce(value, 500);

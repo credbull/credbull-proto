@@ -19,23 +19,22 @@ contract DeployScript is ScaffoldETHDeploy {
             );
         }
 
-
         vm.startBroadcast(deployerPrivateKey);
-        
-        YourContract yourContract = new YourContract(
-            vm.addr(deployerPrivateKey)
-        );
-        
+
+        // YourContract yourContract = new YourContract(
+        //     vm.addr(deployerPrivateKey)
+        // );
+
         MockToken token = new MockToken();
 
         TestContract testContract = new TestContract(
             address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266),token,"CBL","Campaign Share"
         );
 
-        console.logString(string.concat("YourContract deployed at: ", vm.toString(address(yourContract))));
+        // console.logString(string.concat("YourContract deployed at: ", vm.toString(address(yourContract))));
         console.logString(string.concat("Deployer Private Key: ", vm.toString(deployerPrivateKey)));
-
-        console.logString(string.concat("TestContract deployed at: ", vm.toString(address(testContract))));
+        console.logString(string.concat("YourContract deployed at: ", vm.toString(address(testContract))));
+        console.logString(string.concat("TestContract deployed at: ", vm.toString(deployerPrivateKey)));
 
         vm.stopBroadcast();
 
