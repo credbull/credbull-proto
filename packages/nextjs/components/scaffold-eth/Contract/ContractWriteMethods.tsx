@@ -5,18 +5,13 @@ import { Contract, ContractName, GenericContract, InheritedFunctions } from "~~/
 export const ContractWriteMethods = ({
   onChange,
   deployedContractData,
-  contractName,
 }: {
   onChange: () => void;
   deployedContractData: Contract<ContractName>;
-  contractName: ContractName;
 }) => {
   if (!deployedContractData) {
     return null;
   }
-
-  const mockTokenWriteFunctionNames: string[] = ["mint"];
-  const testContractWriteFunctionNames: string[] = ["deposit", "withdraw", "redeem"];
 
   const functionsToDisplay = (
     (deployedContractData.abi as Abi).filter(part => part.type === "function") as AbiFunction[]
@@ -24,16 +19,6 @@ export const ContractWriteMethods = ({
     .filter(fn => {
       const isWriteableFunction = fn.stateMutability !== "view" && fn.stateMutability !== "pure";
       return isWriteableFunction;
-    })
-    .filter(fn => {
-      switch (contractName) {
-        case "MockToken": {
-          return mockTokenWriteFunctionNames.includes(fn.name);
-        }
-        case "TestContract": {
-          return testContractWriteFunctionNames.includes(fn.name);
-        }
-      }
     })
     .map(fn => {
       return {

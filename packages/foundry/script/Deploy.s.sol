@@ -1,12 +1,10 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../contracts/YourContract.sol";
-import "../contracts/TestContract.sol";
-import {MockToken} from "../contracts/mocks/MockToken.sol";
-
+import "../contracts/CredbullVault.sol";
+import "../contracts/CredbullActiveVaultDelegate.sol";
+import "../contracts/mocks/MockStableCoin.sol";
 import "./DeployHelpers.s.sol";
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract DeployScript is ScaffoldETHDeploy {
     error InvalidPrivateKey(string);
@@ -21,30 +19,18 @@ contract DeployScript is ScaffoldETHDeploy {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        // YourContract yourContract = new YourContract(
-        //     vm.addr(deployerPrivateKey)
-        // );
+        MockStableCoin token = new MockStableCoin();
+        CredbullVault vault = new CredbullVault(token,"LPT","Liquid Pool Token");
+        CredbullActiveVaultDelegate delegate = new CredbullActiveVaultDelegate(address(vault));
 
-        MockToken token = new MockToken();
-
-        TestContract testContract = new TestContract(
-            address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266),token,"CBL","Campaign Share"
-        );
-
-        // console.logString(string.concat("YourContract deployed at: ", vm.toString(address(yourContract))));
         console.logString(string.concat("Deployer Private Key: ", vm.toString(deployerPrivateKey)));
-        console.logString(string.concat("YourContract deployed at: ", vm.toString(address(testContract))));
-        console.logString(string.concat("TestContract deployed at: ", vm.toString(deployerPrivateKey)));
+        console.logString(string.concat("CredbullVault deployed at: ", vm.toString(address(vault))));
+        console.logString(string.concat("CredbullActiveVaultDelegate deployed at: ", vm.toString(address(delegate))));
 
         vm.stopBroadcast();
 
-        /**
-         * This function generates the file containing the contracts Abi definitions.
-         * These definitions are used to derive the types needed in the custom scaffold-eth hooks, for example.
-         * This function should be called last.
-         */
         exportDeployments();
     }
 
-    function test() public {}
+    function test() public { }
 }

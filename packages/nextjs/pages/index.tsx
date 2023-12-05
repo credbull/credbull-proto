@@ -1,71 +1,86 @@
-import { useEffect } from "react";
+import { Abi, AbiFunction } from "abitype";
 import type { NextPage } from "next";
-import { useLocalStorage } from "usehooks-ts";
+import { useAccount, useContractRead } from "wagmi";
 import { MetaHeader } from "~~/components/MetaHeader";
-import { ContractUI } from "~~/components/scaffold-eth";
-import { ContractName } from "~~/utils/scaffold-eth/contract";
-import { getContractNames } from "~~/utils/scaffold-eth/contractNames";
-
-const selectedContractStorageKey = "scaffoldEth2.selectedContract";
-const contractNames = getContractNames();
+import { Spinner } from "~~/components/assets/Spinner";
+import { WriteOnlyFunctionForm, getFunctionInputKey } from "~~/components/scaffold-eth";
+import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
 
 const Lending: NextPage = () => {
-  const [selectedContract, setSelectedContract] = useLocalStorage<ContractName>(
-    selectedContractStorageKey,
-    contractNames[0],
-  );
+  const { address } = useAccount();
 
-  useEffect(() => {
-    if (!contractNames.includes(selectedContract)) {
-      setSelectedContract(contractNames[0]);
-    }
-  }, [selectedContract, setSelectedContract]);
+  const { data: deployedStable, isLoading: isLoadingStable } = useDeployedContractInfo("MockStableCoin");
+  const { data: deployedVault, isLoading: isLoadingVault } = useDeployedContractInfo("CredbullVault");
+  const { data: deployedDelegate, isLoading: isLoadingDelegate } =
+    useDeployedContractInfo("CredbullActiveVaultDelegate");
+
+  const { data: vaultAddress, isLoading: isLoadingActiveVault } = useContractRead({
+    functionName: "activeVault",
+    address: deployedDelegate?.address,
+    abi: deployedDelegate?.abi,
+    enabled: Boolean(deployedDelegate?.address),
+  });
+
+  if (
+    isLoadingStable ||
+    !deployedStable ||
+    isLoadingVault ||
+    !deployedVault ||
+    !address ||
+    isLoadingDelegate ||
+    !deployedDelegate ||
+    isLoadingActiveVault ||
+    !vaultAddress
+  ) {
+    return (
+      <div className="mt-14">
+        <Spinner width="50px" height="50px" />
+      </div>
+    );
+  }
+
+  const approve = (deployedStable.abi as Abi).find(
+    part => part.type === "function" && part.name === "approve",
+  ) as AbiFunction;
+
+  const deposit = (deployedVault.abi as Abi).find(
+    part => part.type === "function" && part.name === "deposit",
+  ) as AbiFunction;
 
   return (
     <>
       <MetaHeader
-        title="Lending Contracts | Scaffold-ETH 2"
-        description="Lending your deployed 🏗 Scaffold-ETH 2 contracts in an easy way"
+        title="Debug Contracts | Scaffold-ETH 2"
+        description="Debug your deployed 🏗 Scaffold-ETH 2 contracts in an easy way"
       />
       <div className="flex flex-col gap-y-6 lg:gap-y-8 py-8 lg:py-12 justify-center items-center">
-        {contractNames.length === 0 ? (
-          <p className="text-3xl mt-14">No contracts found!</p>
-        ) : (
-          <>
-            {contractNames.length > 1 && (
-              <div className="flex flex-row gap-2 w-full max-w-7xl pb-1 px-6 lg:px-10 flex-wrap">
-                {contractNames.map(contractName => (
-                  <button
-                    className={`btn btn-secondary btn-sm normal-case font-thin ${
-                      contractName === selectedContract ? "bg-base-300" : "bg-base-100"
-                    }`}
-                    key={contractName}
-                    onClick={() => setSelectedContract(contractName)}
-                  >
-                    {contractName}
-                  </button>
-                ))}
+        <div className="z-10">
+          <div className="bg-base-100 rounded-3xl shadow-md shadow-secondary border border-base-300 flex flex-col mt-10 relative w-[40rem] m-auto">
+            <div className="h-[5rem] w-[13rem] bg-base-300 absolute self-start rounded-[22px] -top-[38px] -left-[1px] -z-10 py-[0.65rem] shadow-lg shadow-base-300">
+              <div className="flex items-center justify-center space-x-2">
+                <p className="my-0 text-sm">Active Lending Pool</p>
               </div>
-            )}
-            {contractNames.map(contractName => (
-              <ContractUI
-                key={contractName}
-                contractName={contractName}
-                className={contractName === selectedContract ? "" : "hidden"}
+            </div>
+            <div className="p-5 divide-y divide-base-300">
+              <WriteOnlyFunctionForm
+                abiFunction={approve}
+                onChange={() => ({})}
+                contractAddress={vaultAddress}
+                inputs={{
+                  [getFunctionInputKey(approve.name, approve.inputs[0], 0)]: vaultAddress,
+                }}
               />
-            ))}
-          </>
-        )}
-      </div>
-      <div className="text-center mt-8 bg-secondary p-10">
-        <h1 className="text-4xl my-0">Lending Contracts</h1>
-        <p className="text-neutral">
-          You can Lending & interact with your deployed contracts here.
-          <br /> Check{" "}
-          <code className="italic bg-base-300 text-base font-bold [word-spacing:-0.5rem] px-1">
-            packages / nextjs / pages / Lending.tsx
-          </code>{" "}
-        </p>
+              <WriteOnlyFunctionForm
+                abiFunction={deposit}
+                onChange={() => ({})}
+                contractAddress={vaultAddress}
+                inputs={{
+                  [getFunctionInputKey(deposit.name, deposit.inputs[1], 1)]: address,
+                }}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );
