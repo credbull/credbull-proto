@@ -21,7 +21,7 @@ export const AddressInput = ({ value, name, placeholder, onChange, disabled }: C
       onChange(address);
       console.log(walletAddress);
     }
-  }, [placeholder, address]);
+  }, [placeholder, address, onChange, walletAddress]);
   const _debouncedValue = useDebounce(value, 500);
   const debouncedValue = isAddress(value) ? value : _debouncedValue;
   const isDebouncedValueLive = debouncedValue === value;
