@@ -9,7 +9,6 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract TestContract is Ownable, ERC4626 {
     address public campaignOwner;
-    ERC20 myToken;
 
     constructor(address _campaignOwner, IERC20 _asset, string memory _shareName, string memory _shareSymbol)
         Ownable(_campaignOwner)
@@ -17,7 +16,6 @@ contract TestContract is Ownable, ERC4626 {
         ERC20(_shareName, _shareSymbol)
     {
         campaignOwner = _campaignOwner;
-        // myToken = ERC20(address(this));
     }
 
     function deposit(uint256 _amount) public {
@@ -29,10 +27,6 @@ contract TestContract is Ownable, ERC4626 {
 
         IERC20(super.asset()).approve(address(this), amount);
         IERC20(super.asset()).transferFrom(address(this), msg.sender, amount);
-    }
-
-    function tokenMint(uint256 _amount) public {
-        _mint(address(msg.sender), _amount);
     }
 
     function withdraw(uint256 assets, address receiver, address owner)
